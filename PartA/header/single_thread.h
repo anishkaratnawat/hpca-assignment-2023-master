@@ -25,4 +25,5 @@ void singleThread( int input_row,
             }
         }
     }
+
 }
