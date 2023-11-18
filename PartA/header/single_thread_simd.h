@@ -49,10 +49,10 @@ void singleThread(int input_row, int input_col, int *input, int kernel_row,
                 (kernel_j + 3 < kernel_col)
                        ? kernel[kernel_i * kernel_col + kernel_j + 3]
                        : 0,
-                (kernel_j + 3 < kernel_col)
+                (kernel_j + 2 < kernel_col)
                        ? kernel[kernel_i * kernel_col + kernel_j + 2]
                        : 0,
-                (kernel_j + 3 < kernel_col)
+                (kernel_j + 2 < kernel_col)
                        ? kernel[kernel_i * kernel_col + kernel_j + 2]
                        : 0,
                 (kernel_j + 1 < kernel_col)
