@@ -107,9 +107,9 @@ int main(int argc, char *argv[])
     
     // Execute reference program
     long long unsigned int *output_reference = new long long unsigned int[output_row * output_col];
-    begin = TIME_NOW;
+    auto begin = TIME_NOW;
     reference(input_row, input_col, input, kernel_row, kernel_col, kernel, output_row, output_col, output_reference);    
-    end = TIME_NOW;
+    auto end = TIME_NOW;
      cout << "Reference execution time: " << (double)TIME_DIFF(std::chrono::microseconds, begin, end) / 1000.0 << " ms\n";
     // Execute gpuThread
     long long unsigned int *output_gpu = new long long unsigned int[output_row * output_col];
