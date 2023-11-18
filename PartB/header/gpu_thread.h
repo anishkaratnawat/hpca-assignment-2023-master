@@ -52,7 +52,7 @@ void dilatedConvolutionGPU(const int* h_input, const int* h_kernel, int* h_outpu
     dim3 gridDim((outputSize + blockDim.x - 1) / blockDim.x, (outputSize + blockDim.y - 1) / blockDim.y);
 
     // Launch the kernel
-    dilatedConvolutionKernel<<<gridDim, blockDim>>>(d_input, d_kernel, d_output, inputSize, kernelSize, outputSize);
+    gpuThread<<<gridDim, blockDim>>>(d_input, d_kernel, d_output, inputSize, kernelSize, outputSize);
 
     // Copy the result back from device to host
     cudaMemcpy(h_output, d_output, outputSize * outputSize * sizeof(int), cudaMemcpyDeviceToHost);
