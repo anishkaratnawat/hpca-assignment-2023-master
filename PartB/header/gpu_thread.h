@@ -2,7 +2,7 @@
 #include <vector>
 #include <cuda_runtime.h>
 
-// Create other necessary functions here
+// Kernel to perform dilated convolution on GPU
 __global__ void dilatedConvolutionKernel(int input_row, int input_col, const int* input,
                                          int kernel_row, int kernel_col, const int* kernel,
                                          int output_row, int output_col, unsigned long long int* output) {
@@ -25,18 +25,14 @@ __global__ void dilatedConvolutionKernel(int input_row, int input_col, const int
     }
 }
 
-// Fill in this function
-void gpuThread( int input_row, 
-                int input_col,
-                int *input, 
-                int kernel_row, 
-                int kernel_col, 
-                int *kernel,
-                int output_row, 
-                int output_col, 
-                long long unsigned int *output ) 
-{
-     int* d_input, *d_kernel;
+// Function to perform dilated convolution on GPU
+void gpuThread(int input_row, int input_col, int* input, 
+               int kernel_row, int kernel_col, int* kernel,
+               int output_row, int output_col, 
+               unsigned long long int* output) {
+
+    // Allocate device memory
+    int* d_input, *d_kernel;
     unsigned long long int* d_output;
     cudaMalloc((void**)&d_input, input_row * input_col * sizeof(int));
     cudaMalloc((void**)&d_kernel, kernel_row * kernel_col * sizeof(int));
@@ -62,5 +58,4 @@ void gpuThread( int input_row,
     cudaFree(d_input);
     cudaFree(d_kernel);
     cudaFree(d_output);
-    
 }
