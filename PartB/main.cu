@@ -105,18 +105,23 @@ int main(int argc, char *argv[])
     
     // Execute reference program
     long long unsigned int *output_reference = new long long unsigned int[output_row * output_col];
+    begin = TIME_NOW;
     reference(input_row, input_col, input, kernel_row, kernel_col, kernel, output_row, output_col, output_reference);    
-    
-    // // Execute gpuThread
-    // long long unsigned int *output_gpu = new long long unsigned int[output_row * output_col];
-    // gpuThread(input_row, input_col, input, kernel_row, kernel_col, kernel, output_row, output_col, output_gpu);    
-    
-    // for(int i = 0; i < output_row * output_col; ++i)
-    //     if(output_gpu[i] != output_reference[i]) {
-    //         cout << "Mismatch at " << i << "\n";
-    //         cout << "GPU output: " << output_gpu[i] << ", required output: " << output_reference[i] << "\n";
-    //         exit(0);
-    //     }
+    end = TIME_NOW;
+     cout << "Reference execution time: " << (double)TIME_DIFF(std::chrono::microseconds, begin, end) / 1000.0 << " ms\n";
+    // Execute gpuThread
+    long long unsigned int *output_gpu = new long long unsigned int[output_row * output_col];
+    begin = TIME_NOW;
+    gpuThread(input_row, input_col, input, kernel_row, kernel_col, kernel, output_row, output_col, output_gpu);    
+    end = TIME_NOW;
+    cout << "GPU execution time: " << (double)TIME_DIFF(std::chrono::microseconds, begin, end) / 1000.0 << " ms\n";
+
+    for(int i = 0; i < output_row * output_col; ++i)
+        if(output_gpu[i] != output_reference[i]) {
+            cout << "Mismatch at " << i << "\n";
+            cout << "GPU output: " << output_gpu[i] << ", required output: " << output_reference[i] << "\n";
+            exit(0);
+        }
     input_file.close();
     kernel_file.close(); 
     return 0;  
