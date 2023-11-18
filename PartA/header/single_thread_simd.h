@@ -20,15 +20,15 @@ void singleThread( int input_row,
 
     for (int i = 0; i < output_row; ++i) {
         for (int j = 0; j < output_col; ++j) {
-            __m128i sum = _mm_setzero_si128();
+            __m256i sum = _mm256_setzero_si256();
 
             for (int ki = 0; ki < kernel_row; ++ki) {
                 for (int kj = 0; kj < kernel_col; ++kj) {
-                    __m128i inputVal = _mm_loadu_si128(reinterpret_cast<const __m128i*>(&input[(i + 2*ki) * input_col + (j + 2*kj)]));
-                    __m128i kernelVal = _mm_set1_epi32(kernel[ki * kernel_col + kj]);
-                    sum = _mm_add_epi32(sum, _mm_mullo_epi32(inputVal, kernelVal));
+                    __m256i inputVal = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(&input[(i + 2*ki) * input_col + (j + 2*kj)]));
+                    __m256i kernelVal = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(&kernel[ki * kernel_col + kj]));
+                    sum = _mm256_add_epi32(sum, _mm256_mullo_epi32(inputVal, kernelVal));
                 }
-                  _mm_storeu_si128(reinterpret_cast<__m128i*>(&output[i * output_col + j]), sum);
+                  _mm256_storeu_si256(reinterpret_cast<__m256i*>(&output[i * output_col + j]), sum);
             }
         }
     }
