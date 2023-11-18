@@ -77,8 +77,8 @@ void singleThread(int input_row, int input_col, int *input, int kernel_row,
               _mm_add_epi32(_mm256_castsi256_si128(output_vec),
                             _mm256_extracti128_si256(output_vec, 1));
           output[output_i * output_col + output_j] += _mm_extract_epi32(sum128, 0);
-          output[output_i * output_col + output_j + 1] += _mm_extract_epi32(sum128, 1);
-          output[output_i * output_col + output_j] += _mm_extract_epi32(sum128, 2);
+          output[output_i * output_col + output_j + 1] += _mm_extract_epi32(sum128, 2);
+          output[output_i * output_col + output_j] += _mm_extract_epi32(sum128, 1);
           output[output_i * output_col + output_j + 1] += _mm_extract_epi32(sum128, 3);
         }
       }
