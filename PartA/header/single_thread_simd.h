@@ -18,40 +18,18 @@ void singleThread( int input_row,
 {
 
 
-    const int vectorSize = 8;
+    for (int i = 0; i < output_row; ++i) {
+        for (int j = 0; j < output_col; ++j) {
+            __m256i sum = _mm256_setzero_si256();
 
-    // Iterate over the output matrix in vectorized blocks
-    for (int output_i = 0; output_i < output_row; ++output_i) {
-        for (int output_j = 0; output_j < output_col; ++output_j) {
-
-            int output_index = output_i * output_col + output_j;
-
-            // Initialize the result vector with zeros
-            __m256 resultVector = _mm256_setzero_ps();
-
-            // Iterate over the kernel matrix
-            for (int kernel_i = 0; kernel_i < kernel_row; ++kernel_i) {
-                int input_i_offset = 2 * kernel_i;
-                int input_i = (output_i + input_i_offset) % input_row;
-
-                for (int kernel_j = 0; kernel_j < kernel_col; ++kernel_j) {
-                    int input_j_offset = 2 * kernel_j;
-                    int input_j = (output_j + input_j_offset) % input_col;
-
-                    int input_index = input_i * input_col + input_j;
-                    int kernel_index = kernel_i * kernel_col + kernel_j;
-
-                    // Load vectors
-                    __m256 inputVector = _mm256_loadu_ps(&input[input_index]);
-                    __m256 kernelVector = _mm256_loadu_ps(&kernel[kernel_index]);
-
-                    // Multiply and accumulate
-                    resultVector = _mm256_fmadd_ps(inputVector, kernelVector, resultVector);
+            for (int ki = 0; ki < kernel_row; ++ki) {
+                for (int kj = 0; kj < kernel_col; ++kj) {
+                    __m256i inputVal = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(&input[(i + 2*ki) * input_col + (j + 2*kj)]));
+                    __m256i kernelVal = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(&kernel[ki * kernel_col + kj]));
+                    sum = _mm256_add_epi32(sum, _mm256_mullo_epi32(inputVal, kernelVal));
                 }
+                  _mm256_storeu_si256(reinterpret_cast<__m256i*>(&output[i * output_col + j]), sum);
             }
-
-            // Store the result vector in the output matrix
-            _mm256_storeu_ps(&output[output_index], resultVector);
         }
     }
   
