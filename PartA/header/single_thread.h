@@ -1,4 +1,5 @@
 // Optimize this function
+
 void singleThread( int input_row, 
                 int input_col,
                 int *input, 
