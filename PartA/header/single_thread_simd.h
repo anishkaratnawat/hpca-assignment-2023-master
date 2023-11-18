@@ -28,7 +28,7 @@ void singleThread( int input_row,
                     __m128i kernelVal = _mm_set1_epi32(kernel[ki * kernel_col + kj]);
                     sum = _mm_add_epi32(sum, _mm_mullo_epi32(inputVal, kernelVal));
                 }
-                  mm_storeu_si128(reinterpret_cast<_m128i*>(&output[i * output_col + j]), sum);
+                  _mm_storeu_si128(reinterpret_cast<__m128i*>(&output[i * output_col + j]), sum);
             }
         }
     }
