@@ -6,42 +6,69 @@
 
 // Optimize this function
 
-// Function to perform dilated convolution using AVX intrinsics
-void singleThread(int input_row, int input_col, int *input, int kernel_row,
-                  int kernel_col, int *kernel, int output_row, int output_col,
-                  long long unsigned int *output) {
+void singleThread( int input_row, 
+                int input_col,
+                int *input, 
+                int kernel_row, 
+                int kernel_col, 
+                int *kernel,
+                int output_row, 
+                int output_col, 
+                long long unsigned int *output ) 
+{
 
-    // Iterate through the input
-    for (int i = 0; i < input_row; ++i) {
-        for (int j = 0; j < input_col; ++j) {
-            int rowIndex = i * 2;
-            int colIndex = j * 2;
 
-            // Iterate through the kernel
-            for (int m = 0; m < kernel_row; ++m) {
-                for (int n = 0; n < kernel_col; ++n) {
-                    int outputRowIndex = rowIndex + m;
-                    int outputColIndex = colIndex + n;
+    for (int i = 0; i < output_row; ++i) {
+        for (int j = 0; j < output_col; ++j) {
+            __m128i sum = _mm_setzero_si128();
 
-                    // Compute the indices
-                    int inputIndex = i * input_col + j;
-                    int kernelIndex = m * kernel_col + n;
-                    int outputIndex = outputRowIndex * output_col + outputColIndex;
-
-                    __m256i inputVector = _mm256_loadu_si256((const __m256i_u *)(&input[inputIndex]));
-                    __m256i kernelVector = _mm256_loadu_si256((const __m256i_u *)(&kernel[kernelIndex]));
-
-                    // Multiply input and kernel vectors element-wise, then add to the result vector
-                    __m256i resultVector = _mm256_loadu_si256((const __m256i_u *)(&output[outputIndex]));
-                    resultVector = _mm256_add_epi32(resultVector, _mm256_mullo_epi32(inputVector, kernelVector));
-
-                    // Store the result vector
-                    _mm256_storeu_si256(reinterpret_cast<__m256i*>(&output[outputIndex]), resultVector);
+            for (int ki = 0; ki < kernel_row; ++ki) {
+                for (int kj = 0; kj < kernel_col; ++kj) {
+                    __m128i inputVal = _mm_loadu_si128(reinterpret_cast<const __m128i*>(&input[(i + ki) * input_col + (j + kj)]));
+                    __m128i kernelVal = _mm_set1_epi32(kernel[ki * kernel_col + kj]);
+                    sum = _mm_add_epi32(sum, _mm_mullo_epi32(inputVal, kernelVal));
                 }
+                  mm_storeu_si128(reinterpret_cast<_m128i*>(&output[i * output_col + j]), sum);
             }
         }
     }
+  
 }
+// void singleThread(int input_row, int input_col, int *input, int kernel_row,
+//                   int kernel_col, int *kernel, int output_row, int output_col,
+//                   long long unsigned int *output) {
+
+//     // Iterate through the input
+//     for (int i = 0; i < input_row; ++i) {
+//         for (int j = 0; j < input_col; ++j) {
+//             int rowIndex = i * 2;
+//             int colIndex = j * 2;
+
+//             // Iterate through the kernel
+//             for (int m = 0; m < kernel_row; ++m) {
+//                 for (int n = 0; n < kernel_col; ++n) {
+//                     int outputRowIndex = rowIndex + m;
+//                     int outputColIndex = colIndex + n;
+
+//                     // Compute the indices
+//                     int inputIndex = i * input_col + j;
+//                     int kernelIndex = m * kernel_col + n;
+//                     int outputIndex = outputRowIndex * output_col + outputColIndex;
+
+//                     __m256i inputVector = _mm256_loadu_si256((const __m256i_u *)(&input[inputIndex]));
+//                     __m256i kernelVector = _mm256_loadu_si256((const __m256i_u *)(&kernel[kernelIndex]));
+
+//                     // Multiply input and kernel vectors element-wise, then add to the result vector
+//                     __m256i resultVector = _mm256_loadu_si256((const __m256i_u *)(&output[outputIndex]));
+//                     resultVector = _mm256_add_epi32(resultVector, _mm256_mullo_epi32(inputVector, kernelVector));
+
+//                     // Store the result vector
+//                     _mm256_storeu_si256(reinterpret_cast<__m256i*>(&output[outputIndex]), resultVector);
+//                 }
+//             }
+//         }
+//     }
+// }
 // void singleThread(int input_row, int input_col, int *input, int kernel_row,
 //                   int kernel_col, int *kernel, int output_row, int output_col,
 //                   long long unsigned int *output) {
