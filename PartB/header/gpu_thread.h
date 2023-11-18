@@ -2,7 +2,7 @@
 #include <vector>
 #include <cuda_runtime.h>
 
-// Kernel to perform dilated convolution on GPU
+// Kernel to perform optimized dilated convolution on GPU
 __global__ void dilatedConvolutionKernel(int input_row, int input_col, const int* input,
                                          int kernel_row, int kernel_col, const int* kernel,
                                          int output_row, int output_col, unsigned long long int* output) {
@@ -12,11 +12,15 @@ __global__ void dilatedConvolutionKernel(int input_row, int input_col, const int
     if (i < output_row && j < output_col) {
         unsigned long long int sum = 0;
 
-        for (int ki = 0; ki < kernel_row; ++ki) {
-            for (int kj = 0; kj < kernel_col; ++kj) {
-                int inputIndex = (i + ki) * input_col + (j + kj);
-                int kernelIndex = ki * kernel_col + kj;
-                sum += static_cast<unsigned long long int>(input[inputIndex]) * static_cast<unsigned long long int>(kernel[kernelIndex]);
+        for (int kernel_i = 0; kernel_i < kernel_row; ++kernel_i) {
+            for (int kernel_j = 0; kernel_j < kernel_col; ++kernel_j) {
+                int kernel_index = kernel_i * kernel_col + kernel_j;
+                
+                int input_i = (i + 2 * kernel_i) % input_row;
+                int input_j = (j + 2 * kernel_j) % input_col;
+                
+                sum += static_cast<unsigned long long int>(input[input_i * input_col + input_j]) * 
+                       static_cast<unsigned long long int>(kernel[kernel_index]);
             }
         }
 
