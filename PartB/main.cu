@@ -7,6 +7,8 @@
 #include <unistd.h>
 using namespace std;
 
+#define TIME_NOW std::chrono::high_resolution_clock::now()
+#define TIME_DIFF(gran, start, end) std::chrono::duration_cast<gran>(end - start).count()
 #include "gpu_thread.h"
 
 // Used to cross-check answer. DO NOT MODIFY!
@@ -105,12 +107,17 @@ int main(int argc, char *argv[])
     
     // Execute reference program
     long long unsigned int *output_reference = new long long unsigned int[output_row * output_col];
+    auto begin = TIME_NOW;
     reference(input_row, input_col, input, kernel_row, kernel_col, kernel, output_row, output_col, output_reference);    
-    
+    auto end = TIME_NOW;
+     cout << "Reference execution time: " << (double)TIME_DIFF(std::chrono::microseconds, begin, end) / 1000.0 << " ms\n";
     // Execute gpuThread
     long long unsigned int *output_gpu = new long long unsigned int[output_row * output_col];
+    begin = TIME_NOW;
     gpuThread(input_row, input_col, input, kernel_row, kernel_col, kernel, output_row, output_col, output_gpu);    
-    
+    end = TIME_NOW;
+    cout << "GPU execution time: " << (double)TIME_DIFF(std::chrono::microseconds, begin, end) / 1000.0 << " ms\n";
+
     for(int i = 0; i < output_row * output_col; ++i)
         if(output_gpu[i] != output_reference[i]) {
             cout << "Mismatch at " << i << "\n";
