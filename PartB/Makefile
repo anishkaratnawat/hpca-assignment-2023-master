@@ -1,6 +1,6 @@
 sim: data/64.in data/128.in dilated_conv_sim
 
-server: data/2048.in dilated_conv_server
+server: data/2048.in data/1024.in data/128.in data/64.in dilated_conv_server
 
 dilated_conv_server: main.cu header/gpu_thread.h
 	nvcc main.cu -o dilated_conv_server -I ./header
