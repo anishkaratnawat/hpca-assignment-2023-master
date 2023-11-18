@@ -29,7 +29,9 @@ void gpuThread(int input_row, int input_col, int *input,
                int kernel_row, int kernel_col, int *kernel,
                int output_row, int output_col, long long unsigned int *output) {
     // Define block and grid dimensions
-    dim3 blockSize(16, 16); // Adjust block size as needed
+    dim3 blockSize; // Adjust block size as needed
+    dim3 gridSize;
+    cudaOccupancyMaxPotentialBlockSize(&gridSize, &blockSize, gpuThreadKernel, 0, 0); 
     dim3 gridSize((output_col + blockSize.x - 1) / blockSize.x,
                   (output_row + blockSize.y - 1) / blockSize.y);
 
