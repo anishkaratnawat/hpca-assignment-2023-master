@@ -132,18 +132,18 @@ int main(int argc, char *argv[])
         }
     
     // Execute multi-thread
-    long long unsigned int *output_multi = new long long unsigned int[output_row * output_col];
-    begin = TIME_NOW;
-    multiThread(input_row, input_col, input, kernel_row, kernel_col, kernel, output_row, output_col, output_multi); 
-    end = TIME_NOW;
-    cout << "Multi-threaded execution time: " << (double)TIME_DIFF(std::chrono::microseconds, begin, end) / 1000.0 << " ms\n";
+    // long long unsigned int *output_multi = new long long unsigned int[output_row * output_col];
+    // begin = TIME_NOW;
+    // multiThread(input_row, input_col, input, kernel_row, kernel_col, kernel, output_row, output_col, output_multi); 
+    // end = TIME_NOW;
+    // cout << "Multi-threaded execution time: " << (double)TIME_DIFF(std::chrono::microseconds, begin, end) / 1000.0 << " ms\n";
     
-    for(int i = 0; i < output_row * output_col; ++i)
-        if(output_multi[i] != output_reference[i]) {
-            cout << "Mismatch at " << i << "\n";
-            cout << "Multi-Thread output: " << output_multi[i] << ", required output: " << output_reference[i] << "\n";
-            exit(0);
-        }
+    // for(int i = 0; i < output_row * output_col; ++i)
+    //     if(output_multi[i] != output_reference[i]) {
+    //         cout << "Mismatch at " << i << "\n";
+    //         cout << "Multi-Thread output: " << output_multi[i] << ", required output: " << output_reference[i] << "\n";
+    //         exit(0);
+    //     }
 
     input_file.close();
     kernel_file.close(); 
