@@ -1,62 +1,56 @@
-#include <iostream>
-#include <vector>
 #include <cuda_runtime.h>
 
-// Kernel to perform optimized dilated convolution on GPU
-__global__ void dilatedConvolutionKernel(int input_row, int input_col, const int* input,
-                                         int kernel_row, int kernel_col, const int* kernel,
-                                         int output_row, int output_col, unsigned long long int* output) {
-    int i = blockIdx.x * blockDim.x + threadIdx.x;
-    int j = blockIdx.y * blockDim.y + threadIdx.y;
+// CUDA kernel for the computation
+__global__ void gpuThreadKernel(int input_row, int input_col,
+                                int *input, int kernel_row, int kernel_col,
+                                int *kernel, int output_row, int output_col,
+                                long long unsigned int *output) {
+    // Calculate thread indices
+    int output_i = blockIdx.y * blockDim.y + threadIdx.y;
+    int output_j = blockIdx.x * blockDim.x + threadIdx.x;
 
-    if (i < output_row && j < output_col) {
-        unsigned long long int sum = 0;
-
-        for (int kernel_i = 0; kernel_i < kernel_row; ++kernel_i) {
-            for (int kernel_j = 0; kernel_j < kernel_col; ++kernel_j) {
+    // Check if thread is within the output dimensions
+    if (output_i < output_row && output_j < output_col) {
+        for (int kernel_i = 0; kernel_i < kernel_row; kernel_i++) {
+            for (int kernel_j = 0; kernel_j < kernel_col; kernel_j++) {
+                int input_i = (output_i + 2 * kernel_i) % input_row;
+                int input_j = (output_j + 2 * kernel_j) % input_col;
                 int kernel_index = kernel_i * kernel_col + kernel_j;
-                
-                int input_i = (i + 2 * kernel_i) % input_row;
-                int input_j = (j + 2 * kernel_j) % input_col;
-                
-                sum += static_cast<unsigned long long int>(input[input_i * input_col + input_j]) * 
-                       static_cast<unsigned long long int>(kernel[kernel_index]);
+
+                atomicAdd(&output[output_i * output_col + output_j],
+                          input[input_i * input_col + input_j] * kernel[kernel_index]);
             }
         }
-
-        int outputIndex = i * output_col + j;
-        output[outputIndex] = sum;
     }
 }
 
-// Function to perform dilated convolution on GPU
-void gpuThread(int input_row, int input_col, int* input, 
-               int kernel_row, int kernel_col, int* kernel,
-               int output_row, int output_col, 
-               unsigned long long int* output) {
+// Wrapper function to call the CUDA kernel
+void gpuThread(int input_row, int input_col, int *input,
+               int kernel_row, int kernel_col, int *kernel,
+               int output_row, int output_col, long long unsigned int *output) {
+    // Define block and grid dimensions
+    dim3 blockSize(16, 16); // Adjust block size as needed
+    dim3 gridSize((output_col + blockSize.x - 1) / blockSize.x,
+                  (output_row + blockSize.y - 1) / blockSize.y);
 
     // Allocate device memory
-    int* d_input, *d_kernel;
-    unsigned long long int* d_output;
-    cudaMalloc((void**)&d_input, input_row * input_col * sizeof(int));
-    cudaMalloc((void**)&d_kernel, kernel_row * kernel_col * sizeof(int));
-    cudaMalloc((void**)&d_output, output_row * output_col * sizeof(unsigned long long int));
+    int *d_input, *d_kernel;
+    long long unsigned int *d_output;
+    cudaMalloc((void **)&d_input, input_row * input_col * sizeof(int));
+    cudaMalloc((void **)&d_kernel, kernel_row * kernel_col * sizeof(int));
+    cudaMalloc((void **)&d_output, output_row * output_col * sizeof(long long unsigned int));
 
-    // Copy input and kernel matrices from host to device
+    // Copy input and kernel data to device
     cudaMemcpy(d_input, input, input_row * input_col * sizeof(int), cudaMemcpyHostToDevice);
     cudaMemcpy(d_kernel, kernel, kernel_row * kernel_col * sizeof(int), cudaMemcpyHostToDevice);
 
-    // Define block and grid dimensions
-    dim3 blockSize(16, 16);
-    dim3 gridSize((output_row + blockSize.x - 1) / blockSize.x, (output_col + blockSize.y - 1) / blockSize.y);
-
-    // Launch kernel
-    dilatedConvolutionKernel<<<gridSize, blockSize>>>(input_row, input_col, d_input,
-                                                       kernel_row, kernel_col, d_kernel,
-                                                       output_row, output_col, d_output);
+    // Launch the kernel
+    gpuThreadKernel<<<gridSize, blockSize>>>(input_row, input_col, d_input,
+                                             kernel_row, kernel_col, d_kernel,
+                                             output_row, output_col, d_output);
 
     // Copy the result back to the host
-    cudaMemcpy(output, d_output, output_row * output_col * sizeof(unsigned long long int), cudaMemcpyDeviceToHost);
+    cudaMemcpy(output, d_output, output_row * output_col * sizeof(long long unsigned int), cudaMemcpyDeviceToHost);
 
     // Free device memory
     cudaFree(d_input);
