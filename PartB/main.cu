@@ -7,6 +7,8 @@
 #include <unistd.h>
 using namespace std;
 
+#define TIME_NOW std::chrono::high_resolution_clock::now()
+#define TIME_DIFF(gran, start, end) std::chrono::duration_cast<gran>(end - start).count()
 #include "gpu_thread.h"
 
 // Used to cross-check answer. DO NOT MODIFY!
