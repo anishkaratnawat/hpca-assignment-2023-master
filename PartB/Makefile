@@ -27,10 +27,10 @@ run_sim: data/128.in dilated_conv_sim
 	./dilated_conv_sim -i data/128.in -k data/64.in
 	
 run_server: data/2048.in data/128.in data/1024.in data/64.in data/11.in dilated_conv_server
-	./dilated_conv_server data/2048.in -k data/64.in
-	./dilated_conv_server data/128.in -k data/64.in
-	./dilated_conv_server data/1024.in -k data/64.in
-	./dilated_conv_server data/64.in -k data/11.in
+	./dilated_conv_server -i data/2048.in -k data/64.in
+	./dilated_conv_server -i data/128.in -k data/64.in
+	./dilated_conv_server -i data/1024.in -k data/64.in
+	./dilated_conv_server -i data/64.in -k data/11.in
 
 clean:
 	rm -f dilated_conv_sim dilated_conv_server
