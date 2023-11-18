@@ -24,7 +24,7 @@ void singleThread( int input_row,
 
             for (int ki = 0; ki < kernel_row; ++ki) {
                 for (int kj = 0; kj < kernel_col; ++kj) {
-                    __m128i inputVal = _mm_loadu_si128(reinterpret_cast<const __m128i*>(&input[(i + ki) * input_col + (j + kj)]));
+                    __m128i inputVal = _mm_loadu_si128(reinterpret_cast<const __m128i*>(&input[(i + 2*ki) * input_col + (j + 2*kj)]));
                     __m128i kernelVal = _mm_set1_epi32(kernel[ki * kernel_col + kj]);
                     sum = _mm_add_epi32(sum, _mm_mullo_epi32(inputVal, kernelVal));
                 }
