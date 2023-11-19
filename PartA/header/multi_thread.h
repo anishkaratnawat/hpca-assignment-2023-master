@@ -1,10 +1,6 @@
 #include <pthread.h>
 #define num_threads 8
 // Create other necessary functions here
-
-
-// Fill in this function
-
 struct ThreadData {
     int *input;
     int *kernel;
@@ -15,7 +11,7 @@ struct ThreadData {
 };
 
 void* threadDilatedConvolution(void* arg) {
-    ThreadData* data = static_cast<ThreadData*>(arg);
+    ThreadData* data = (ThreadData*)(arg);
     long long unsigned int partial_sum;
     int input_i, input_j;
 
@@ -45,13 +41,14 @@ void* threadDilatedConvolution(void* arg) {
 
             }
 
-            data->output[output_row_skip + output_j] = static_cast<int>(partial_sum);
+            data->output[output_row_skip + output_j] = (partial_sum);
         }
     }
 
     pthread_exit(nullptr);
 }
 
+// Fill in this function
 void multiThread( int input_row, 
                 int input_col,
                 int *input, 
@@ -65,7 +62,7 @@ void multiThread( int input_row,
     pthread_t threads[num_threads];
     struct ThreadData threadData[num_threads];
 
-    // Calculate the number of rows each thread will handle
+    // Calculate the number of rows per thread
     int rows_per_thread = output_row / num_threads;
     
     for (int i = 0; i < num_threads; ++i) {
@@ -79,16 +76,16 @@ void multiThread( int input_row,
         threadData[i].kernel_row = kernel_row;
         threadData[i].kernel_col = kernel_col;
         threadData[i].start_i = i * rows_per_thread;
-        threadData[i].end_i = ((i == num_threads - 1) ? output_row : (i + 1) * rows_per_thread);
+        if ( i == num_threads - 1 )
+            threadData[i].end_i = output_row;
+        else
+            threadData[i].end_i = ( i + 1 ) * rows_per_thread;
         threadData[i].dilation = 2;
-        int partial_sumult = pthread_create(&threads[i], nullptr, threadDilatedConvolution, &threadData[i]);
-        if (partial_sumult != 0) {
-            std::cerr << "Error creating thread " << i << ": " << partial_sumult << std::endl;
+        int partial_sum = pthread_create(&threads[i], nullptr, threadDilatedConvolution, &threadData[i]);
+        if (partial_sum != 0) {
+            std::cerr << "Error creating thread " << i << ": " << partial_sum << std::endl;
             exit(EXIT_FAILURE);
         }
-        
-
-
         
     }
 
