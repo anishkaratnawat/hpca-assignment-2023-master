@@ -8,45 +8,38 @@ __global__ void gpuThreadKernel(int input_row, int input_col,
     // Calculate thread indices
     int output_i = blockIdx.y * blockDim.y + threadIdx.y;
     int output_j = blockIdx.x * blockDim.x + threadIdx.x;
-
+    int dilation = 2;
+    int input_i, input_j;
+    long long unsigned int partial_sum;
     // Check if thread is within the output dimensions
     if (output_i < output_row && output_j < output_col) {
-    int output_offset = output_i * output_col;
-
+ 
+        int output_row_skip = output_i * output_col;
+        partial_sum = 0;
+        input_i = output_i;
         
-            long long unsigned int res = 0;
+        for (int kernel_i = 0; kernel_i < kernel_row; ++kernel_i) {
+            int kernel_row_skip = kernel_i * kernel_col;
+            int input_row_skip = input_i * input_col;
+            input_j = output_j;
 
-            // Adjust input_i to handle boundary conditions
-            int input_i = (output_i - 2 + input_row) % input_row;
+            for (int kernel_j = 0; kernel_j < kernel_col; ++kernel_j) {
 
-            for (int kernel_i = 0; kernel_i < kernel_row; ++kernel_i) {
-                int kernel_offset = kernel_i * kernel_col;
+                partial_sum = partial_sum + input[input_row_skip + input_j] * kernel[kernel_row_skip + kernel_j];
 
-                // Adjust input_i to handle boundary conditions
-                if (input_i + 2 >= input_row) {
-                    input_i = (input_i + 2) % input_row;
-                } else {
-                    input_i = (input_i + 2);
-                }
-
-                int input_offset = input_i * input_col;
-                int input_j = (output_j - 2 + input_col) % input_col;
-
-                for (int kernel_j = 0; kernel_j < kernel_col; ++kernel_j) {
-                    // Adjust input_j to handle boundary conditions
-                    if (input_j + 2 >= input_col) {
-                        input_j = (input_j + 2) % input_col;
-                    } else {
-                        input_j = (input_j + 2);
-                    }
-
-                    res += input[input_offset + input_j] * kernel[kernel_offset + kernel_j];
-                }
+                input_j = input_j + dilation;
+                if(input_j >= input_col)
+                    input_j = input_j % input_col;
             }
 
-            output[output_offset + output_j] = static_cast<int>(res);
-        
+            input_i = input_i + dilation;
+            if(input_i >= input_row)
+                    input_i = input_i % input_row;
+        }
+
+        output[output_row_skip + output_j] = partial_sum;
     }
+    
 }
 
 // __global__ void gpuThreadKernel(int input_row, int input_col,

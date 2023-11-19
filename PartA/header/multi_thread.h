@@ -11,46 +11,41 @@ struct ThreadData {
     long long unsigned int *output;
     int input_row, input_col, output_row, output_col, kernel_row, kernel_col;
     int start_i, end_i; // Range of rows for this thread
+    int dilation;
 };
 
 void* threadDilatedConvolution(void* arg) {
     ThreadData* data = static_cast<ThreadData*>(arg);
+    long long unsigned int partial_sum;
+    int input_i, input_j;
 
         for (int output_i = data->start_i; output_i < data->end_i; ++output_i) {
-        int output_offset = output_i * data->output_col;
+        int output_row_skip = output_i * data->output_col;
 
         for (int output_j = 0; output_j < data->output_col; ++output_j) {
-            long long unsigned int res = 0;
+            partial_sum = 0;
 
-            // Adjust input_i to handle boundary conditions
-            int input_i = (output_i - 2 + data->input_row) % data->input_row;
-
+            input_i = output_i;
             for (int kernel_i = 0; kernel_i < data->kernel_row; ++kernel_i) {
-                int kernel_offset = kernel_i * data->kernel_col;
+                int kernel_row_skip = kernel_i * data->kernel_col;
 
-                // Adjust input_i to handle boundary conditions
-                if (input_i + 2 >= data->input_row) {
-                    input_i = (input_i + 2) % data->input_row;
-                } else {
-                    input_i = (input_i + 2);
-                }
-
-                int input_offset = input_i * data->input_col;
-                int input_j = (output_j - 2 + data->input_col) % data->input_col;
+                int input_row_skip = input_i * data->input_col;
+                input_j = (output_j) % data->input_col;
 
                 for (int kernel_j = 0; kernel_j < data->kernel_col; ++kernel_j) {
-                    // Adjust input_j to handle boundary conditions
-                    if (input_j + 2 >= data->input_col) {
-                        input_j = (input_j + 2) % data->input_col;
-                    } else {
-                        input_j = (input_j + 2);
-                    }
+                    partial_sum += data->input[input_row_skip + input_j] * data->kernel[kernel_row_skip + kernel_j];
+                    input_j = input_j + data->dilation;
+                    if(input_j >= data->input_row)
+                        input_j = input_j % data->input_row;
 
-                    res += data->input[input_offset + input_j] * data->kernel[kernel_offset + kernel_j];
                 }
+                 input_i = input_i + data->dilation;
+                if(input_i >= data->input_col)
+                    input_i = input_i % data->input_col;
+
             }
 
-            data->output[output_offset + output_j] = static_cast<int>(res);
+            data->output[output_row_skip + output_j] = static_cast<int>(partial_sum);
         }
     }
 
@@ -85,9 +80,10 @@ void multiThread( int input_row,
         threadData[i].kernel_col = kernel_col;
         threadData[i].start_i = i * rows_per_thread;
         threadData[i].end_i = ((i == num_threads - 1) ? output_row : (i + 1) * rows_per_thread);
-        int result = pthread_create(&threads[i], nullptr, threadDilatedConvolution, &threadData[i]);
-        if (result != 0) {
-            std::cerr << "Error creating thread " << i << ": " << result << std::endl;
+        threadData[i].dilation = 2;
+        int partial_sumult = pthread_create(&threads[i], nullptr, threadDilatedConvolution, &threadData[i]);
+        if (partial_sumult != 0) {
+            std::cerr << "Error creating thread " << i << ": " << partial_sumult << std::endl;
             exit(EXIT_FAILURE);
         }
         
