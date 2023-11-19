@@ -13,6 +13,7 @@ __global__ void gpuThreadKernel(int input_row, int input_col,
     int dilation = 2;
     if (output_i < output_row && output_j < output_col) {
     int output_offset = output_i * output_col;
+    long long unsigned int partial_sum = 0;
 
         
             int input_i = output_i;
