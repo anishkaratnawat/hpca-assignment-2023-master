@@ -36,6 +36,7 @@ run_server: data/2048.in data/13.in data/4096.in data/128.in data/1024.in data/6
 	./dilated_conv_server -i data/1024.in -k data/64.in
 	./dilated_conv_server -i data/64.in -k data/11.in
 	./dilated_conv_server -i data/4096.in -k data/13.in
+	./dilated_conv_server -i data/4096.in -k data/64.in
 
 clean:
 	rm -f dilated_conv_sim dilated_conv_server
