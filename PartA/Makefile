@@ -1,4 +1,4 @@
-all: data/3.in data/5.in data/7.in data/9.in data/11.in data/13.in data/64.in data/128.in data/1024.in data/2048.in data/4096.in data/8192.in data/16384.in dilated_conv
+all: data/3.in data/5.in data/7.in data/9.in data/11.in data/12.in data/13.in data/25.in data/64.in data/128.in data/1024.in data/2048.in data/4096.in data/8192.in data/16384.in dilated_conv
 
 dilated_conv: main.cpp header/single_thread.h header/multi_thread.h
 	g++ main.cpp -o dilated_conv -I ./header -lpthread -mavx -mavx2
@@ -21,8 +21,14 @@ data/9.in: data/generate
 data/11.in: data/generate
 	./data/generate 11
 
+data/12.in: data/generate
+	./data/generate 12
+
 data/13.in: data/generate
 	./data/generate 13
+
+data/25.in: data/generate
+	./data/generate 25
 
 data/64.in: data/generate
 	./data/generate 64
