@@ -12,7 +12,6 @@ __global__ void gpuThreadKernel(int input_row, int input_col,
     int input_i, input_j;
     long long unsigned int partial_sum;
     // Check if thread is within the output dimensions
-    int dilation = 2;
     if (output_i < output_row && output_j < output_col) {
  
         int output_row_skip = output_i * output_col;
