@@ -153,7 +153,7 @@ void dilatedConvolutionKernel(int input_row,
  
                 int input_offset = input_i*input_col;
  
-                int input_j= output_j-2;
+                 input_j= output_j-2;
  
                 for(int kernel_j = 0; kernel_j< kernel_col; kernel_j++)
                 {
