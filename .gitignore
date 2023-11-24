@@ -4,3 +4,4 @@
 **/*.sh
 **/output
 **/output_new
+.vscode
