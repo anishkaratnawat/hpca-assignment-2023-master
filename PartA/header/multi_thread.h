@@ -1,6 +1,11 @@
 #include <pthread.h>
-#define num_threads 8
+#include <thread>
+
 // Create other necessary functions here
+
+int num_threads = 8;
+const auto cores = std::thread::hardware_concurrency();
+
 struct ThreadData {
     int *input;
     int *kernel;
@@ -9,6 +14,7 @@ struct ThreadData {
     int start_i, end_i; // Range of rows for this thread
     int dilation;
 };
+
 
 void* threadDilatedConvolution(void* arg) {
     ThreadData* data = (ThreadData*)(arg);
@@ -97,6 +103,8 @@ void multiThread( int input_row,
                 int output_col, 
                 long long unsigned int *output )  {
 
+    if(cores !=0)
+        num_threads = cores;
     pthread_t threads[num_threads];
     struct ThreadData threadData[num_threads];
 
