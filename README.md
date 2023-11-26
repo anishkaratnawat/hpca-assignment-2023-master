@@ -85,5 +85,3 @@ make run_sim
 ## test
 
 This directory contains a simple program to help you understand how the algorithm works. You can play around with the sizes of the Input-Matrix $(I)$ and Kernel-Matrix $(K)$ to get a flavor of how each cell of Output-Matrix $(O)$ is generated. A stripped output of test executable mentioned above for the example discussed is as follows:
-
-![test_example_output](./docs/test_example.png)
