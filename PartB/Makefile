@@ -35,13 +35,13 @@ run_sim: data/128.in dilated_conv_sim
 	./dilated_conv_sim -i data/128.in -k data/64.in
 	
 run_server: data/8192.in data/16384.in data/2048.in data/13.in data/4096.in data/128.in data/1024.in data/64.in data/11.in dilated_conv_server
-	./dilated_conv_server -i data/2048.in -k data/13.in
+	./dilated_conv_server -i data/2048.in -k data/64.in
+	./dilated_conv_server -i data/128.in -k data/64.in
+	./dilated_conv_server -i data/1024.in -k data/64.in
 	
-	./dilated_conv_server -i data/1024.in -k data/13.in
-	
-
-	./dilated_conv_server -i data/8192.in -k data/13.in
-	./dilated_conv_server -i data/16384.in -k data/13.in
+	./dilated_conv_server -i data/4096.in -k data/13.in
+	./dilated_conv_server -i data/4096.in -k data/64.in
+	./dilated_conv_server -i data/8192.in -k data/64.in
 	./dilated_conv_server -i data/16384.in -k data/64.in
 
 clean:
